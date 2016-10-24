@@ -1,56 +1,83 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using ConcurrentTransferMoney.Models;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace ConcurrentTransferMoney.BankTransferService
 {
-    public class ProducerConsumerQueue : IDisposable
+    public class ProducerConsumerQueue
     {
-        private readonly object _locker = new object();
-        private readonly Queue<BankTransferModel> _tasks = new Queue<BankTransferModel>();
-        private readonly EventWaitHandle _wh = new AutoResetEvent(false);
-        private readonly Thread _worker;
-
-        public ProducerConsumerQueue()
+        private class WorkItem
         {
-            _worker = new Thread(Work);
-            _worker.Start();
+            public readonly TaskCompletionSource<object> TaskSource;
+            public readonly Action Action;
+            public readonly CancellationToken? CancelToken;
+
+            public WorkItem(
+                TaskCompletionSource<object> taskSource,
+                Action action,
+                CancellationToken? cancelToken)
+            {
+                TaskSource = taskSource;
+                Action = action;
+                CancelToken = cancelToken;
+            }
+        }
+
+        private readonly BlockingCollection<WorkItem> _taskQ = new BlockingCollection<WorkItem>();
+
+        public ProducerConsumerQueue(int workerCount)
+        {
+            // Create and start a separate Task for each consumer:
+            for (int i = 0; i < workerCount; i++)
+                Task.Factory.StartNew(Consume);
         }
 
         public void Dispose()
         {
-            EnqueueTask(null); // Signal the consumer to exit.
-            _worker.Join(); // Wait for the consumer's thread to finish.
-            _wh.Close(); // Release any OS resources.
+            _taskQ.CompleteAdding();
         }
 
-        public void EnqueueTask(BankTransferModel task)
+        public Task EnqueueTask(Action action)
         {
-            lock (_locker) _tasks.Enqueue(task);
-            _wh.Set();
+            return EnqueueTask(action, null);
         }
 
-        private void Work()
+        public Task EnqueueTask(Action action, CancellationToken? cancelToken)
         {
-            while (true)
-            {
-                BankTransferModel task = null;
-                lock (_locker)
-                    if (_tasks.Any())
-                    {
-                        task = _tasks.Dequeue();
-                        if (task == null) return;
-                    }
-                if (task != null)
+            var tcs = new TaskCompletionSource<object>();
+            _taskQ.Add(new WorkItem(tcs, action, cancelToken));
+            return tcs.Task;
+        }
+
+        private void Consume()
+        {
+            foreach (WorkItem workItem in _taskQ.GetConsumingEnumerable())
+                if (workItem.CancelToken.HasValue &&
+                    workItem.CancelToken.Value.IsCancellationRequested)
                 {
-                    Console.WriteLine("Performing task: " + task);
-                    Thread.Sleep(1000); // simulate work...
+                    workItem.TaskSource.SetCanceled();
                 }
                 else
-                    _wh.WaitOne(); // No more tasks - wait for a signal
-            }
+                    try
+                    {
+                        workItem.Action();
+                        workItem.TaskSource.SetResult(null); // Indicate completion
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        if (ex.CancellationToken == workItem.CancelToken)
+                            workItem.TaskSource.SetCanceled();
+                        else
+                            workItem.TaskSource.SetException(ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        workItem.TaskSource.SetException(ex);
+                    }
         }
     }
 }
