@@ -7,5 +7,6 @@ namespace ConcurrentTransferMoney.Entities
         [Key]
         public int Id { get; set; }
         public decimal Balance { get; set; }
+        public int TransferCount { get; set; }
     }
 }

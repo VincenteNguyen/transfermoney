@@ -1,5 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System.Data.Entity;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using ConcurrentTransferMoney.Entities;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -29,5 +31,6 @@ namespace ConcurrentTransferMoney.Models
         {
             return new ApplicationDbContext();
         }
+        public DbSet<Account> Accounts { get; set; }
     }
 }

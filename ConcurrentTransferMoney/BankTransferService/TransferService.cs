@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using ConcurrentTransferMoney.Models;
 
 namespace ConcurrentTransferMoney.BankTransferService
 {
@@ -9,11 +6,12 @@ namespace ConcurrentTransferMoney.BankTransferService
     {
         public void Transfer(int fromAccountId, int toAccountId, int amount)
         {
-            using (var db = new BankDbContext())
+            using (var db = new ApplicationDbContext())
             {
                 var fromAccount = db.Accounts.Find(fromAccountId);
                 var toAccount = db.Accounts.Find(toAccountId);
                 fromAccount.Balance -= amount;
+                fromAccount.TransferCount++;
                 toAccount.Balance += amount;
                 db.SaveChanges();
             }

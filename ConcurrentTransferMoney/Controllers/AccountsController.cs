@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using ConcurrentTransferMoney;
 using ConcurrentTransferMoney.BankTransferService;
 using ConcurrentTransferMoney.Entities;
 using ConcurrentTransferMoney.Models;
@@ -19,12 +16,13 @@ namespace ConcurrentTransferMoney.Controllers
 {
     public class AccountsController : ApiController
     {
-        private BankDbContext db = new BankDbContext();
-
+        private readonly ApplicationDbContext _db = new ApplicationDbContext();
+        private readonly ProducerConsumerQueue _pcQ = new ProducerConsumerQueue(1);
+        private readonly TransferService _transferService = new TransferService();
         // GET: api/Accounts
         public IQueryable<Account> GetAccounts()
         {
-            return db.Accounts;
+            return _db.Accounts;
         }
 
         [HttpGet]
@@ -41,43 +39,67 @@ namespace ConcurrentTransferMoney.Controllers
                 });
             }
 
-            db.Accounts.AddRange(newAccounts);
-            await db.SaveChangesAsync();
+            _db.Accounts.AddRange(newAccounts);
+            await _db.SaveChangesAsync();
 
             return Ok();
         }
 
         [HttpGet]
-        [Route("accounts/transfer")]
-        public async Task<IHttpActionResult> Transfer([FromUri]BankTransferModel transferModel)
+        [Route("accounts/TransferUsingQueueDemo")]
+        public async Task<IHttpActionResult> TransferUsingQueueDemo()
         {
-            var pcQ = new ProducerConsumerQueue(1);
-            var transferService = new TransferService();
-            Parallel.For(0, 100, i =>
+            Parallel.For(0, 1000, i =>
             {
-                pcQ.EnqueueTask(() => transferService.Transfer(1, 2, 100));
-                pcQ.EnqueueTask(() => transferService.Transfer(2, 1, 99));
-
+                _pcQ.EnqueueTask(() => _transferService.Transfer(1, 2, 100));
+                _pcQ.EnqueueTask(() => _transferService.Transfer(2, 1, 99));
             });
-            var fromAccount = db.Accounts.Find(1);
-            var toAccount = db.Accounts.Find(2);
-            return Ok(string.Format("Your transfer request will be process", fromAccount.Balance, toAccount.Balance));
+            return Ok("Your transfer request will be process");
         }
 
         [HttpGet]
-        [Route("accounts/result")]
-        public async Task<IHttpActionResult> Result()
+        [Route("accounts/TransferUsingQueue")]
+        public async Task<IHttpActionResult> TransferUsingQueue([FromUri] BankTransferModel transferModel)
         {
-            var fromAccount = await db.Accounts.FindAsync(1);
-            var toAccount = await db.Accounts.FindAsync(2);
-            return Ok(string.Format("{0} {1}", fromAccount.Balance, toAccount.Balance));
+            _pcQ.EnqueueTask(
+                () =>
+                    _transferService.Transfer(transferModel.FromAccountId, transferModel.ToAccountId,
+                        transferModel.Amount));
+            return Ok("Your transfer request will be process");
+        }
+
+        /// <summary>
+        ///     Quick check result of two account 1 and 2
+        /// </summary>
+        /// <returns>string: Account1.Balance Account2.Balance</returns>
+        [HttpGet]
+        [Route("accounts/QuickCheckResult")]
+        public async Task<IHttpActionResult> QuickCheckResult(int id1, int id2)
+        {
+            var account1 = await _db.Accounts.FindAsync(id1);
+            var account2 = await _db.Accounts.FindAsync(id2);
+            var resultBuilder = new StringBuilder();
+            GetValue(resultBuilder, account1);
+            resultBuilder.Append(new String('-', 60));
+            GetValue(resultBuilder, account2);
+            return Ok(resultBuilder);
+        }
+
+        private static void GetValue(StringBuilder resultBuilder, Account account)
+        {
+            resultBuilder.AppendFormat("Account id {0}: ", account.Id);
+            resultBuilder.AppendLine();
+            resultBuilder.AppendFormat("Balance: {0}", account.Balance);
+            resultBuilder.AppendLine();
+            resultBuilder.AppendFormat("Transfer Count: {0}", account.TransferCount);
+            resultBuilder.AppendLine();
         }
 
         // GET: api/Accounts/5
-        [ResponseType(typeof(Account))]
+        [ResponseType(typeof (Account))]
         public async Task<IHttpActionResult> GetAccount(int id)
         {
-            Account account = await db.Accounts.FindAsync(id);
+            var account = await _db.Accounts.FindAsync(id);
             if (account == null)
             {
                 return NotFound();
@@ -87,7 +109,7 @@ namespace ConcurrentTransferMoney.Controllers
         }
 
         // PUT: api/Accounts/5
-        [ResponseType(typeof(void))]
+        [ResponseType(typeof (void))]
         public async Task<IHttpActionResult> PutAccount(int id, Account account)
         {
             if (!ModelState.IsValid)
@@ -100,11 +122,11 @@ namespace ConcurrentTransferMoney.Controllers
                 return BadRequest();
             }
 
-            db.Entry(account).State = EntityState.Modified;
+            _db.Entry(account).State = EntityState.Modified;
 
             try
             {
-                await db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -112,17 +134,14 @@ namespace ConcurrentTransferMoney.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         // POST: api/Accounts
-        [ResponseType(typeof(Account))]
+        [ResponseType(typeof (Account))]
         public async Task<IHttpActionResult> PostAccount(Account account)
         {
             if (!ModelState.IsValid)
@@ -130,24 +149,24 @@ namespace ConcurrentTransferMoney.Controllers
                 return BadRequest(ModelState);
             }
 
-            db.Accounts.Add(account);
-            await db.SaveChangesAsync();
+            _db.Accounts.Add(account);
+            await _db.SaveChangesAsync();
 
-            return CreatedAtRoute("DefaultApi", new { id = account.Id }, account);
+            return CreatedAtRoute("DefaultApi", new {id = account.Id}, account);
         }
 
         // DELETE: api/Accounts/5
-        [ResponseType(typeof(Account))]
+        [ResponseType(typeof (Account))]
         public async Task<IHttpActionResult> DeleteAccount(int id)
         {
-            Account account = await db.Accounts.FindAsync(id);
+            var account = await _db.Accounts.FindAsync(id);
             if (account == null)
             {
                 return NotFound();
             }
 
-            db.Accounts.Remove(account);
-            await db.SaveChangesAsync();
+            _db.Accounts.Remove(account);
+            await _db.SaveChangesAsync();
 
             return Ok(account);
         }
@@ -156,14 +175,14 @@ namespace ConcurrentTransferMoney.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }
 
         private bool AccountExists(int id)
         {
-            return db.Accounts.Count(e => e.Id == id) > 0;
+            return _db.Accounts.Count(e => e.Id == id) > 0;
         }
     }
 }
