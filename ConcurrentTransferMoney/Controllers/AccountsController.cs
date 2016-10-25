@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using ConcurrentTransferMoney;
+using ConcurrentTransferMoney.BankTransferService;
 using ConcurrentTransferMoney.Entities;
 using ConcurrentTransferMoney.Models;
 
@@ -50,11 +51,26 @@ namespace ConcurrentTransferMoney.Controllers
         [Route("accounts/transfer")]
         public async Task<IHttpActionResult> Transfer([FromUri]BankTransferModel transferModel)
         {
-            
-            //db.Accounts.AddRange(newAccounts);
-            await db.SaveChangesAsync();
+            var pcQ = new ProducerConsumerQueue(1);
+            var transferService = new TransferService();
+            Parallel.For(0, 100, i =>
+            {
+                pcQ.EnqueueTask(() => transferService.Transfer(1, 2, 100));
+                pcQ.EnqueueTask(() => transferService.Transfer(2, 1, 99));
 
-            return Ok();
+            });
+            var fromAccount = db.Accounts.Find(1);
+            var toAccount = db.Accounts.Find(2);
+            return Ok(string.Format("Your transfer request will be process", fromAccount.Balance, toAccount.Balance));
+        }
+
+        [HttpGet]
+        [Route("accounts/result")]
+        public async Task<IHttpActionResult> Result()
+        {
+            var fromAccount = await db.Accounts.FindAsync(1);
+            var toAccount = await db.Accounts.FindAsync(2);
+            return Ok(string.Format("{0} {1}", fromAccount.Balance, toAccount.Balance));
         }
 
         // GET: api/Accounts/5
