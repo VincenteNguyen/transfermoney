@@ -98,3 +98,7 @@ C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\bin\Debu
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\obj\Debug\ConcurrentTransferMoney.Tests.csprojResolveAssemblyReference.cache
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\obj\Debug\ConcurrentTransferMoney.Tests.dll
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\obj\Debug\ConcurrentTransferMoney.Tests.pdb
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\bin\Debug\nunit.framework.dll
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\bin\Debug\nunit.framework.xml
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\bin\Debug\EntityFramework.SqlServer.dll
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney.Tests\bin\Debug\EntityFramework.SqlServer.xml

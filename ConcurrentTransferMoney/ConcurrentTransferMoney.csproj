@@ -209,17 +209,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="LockVersion\LockProvider.cs" />
-    <Compile Include="Migrations\201610240747020_InitialCreate.cs" />
-    <Compile Include="Migrations\201610240747020_InitialCreate.Designer.cs">
-      <DependentUpon>201610240747020_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201610240754556_InitProject.cs" />
-    <Compile Include="Migrations\201610240754556_InitProject.Designer.cs">
-      <DependentUpon>201610240754556_InitProject.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201610250929416_AddTransferCountToAccount.cs" />
-    <Compile Include="Migrations\201610250929416_AddTransferCountToAccount.Designer.cs">
-      <DependentUpon>201610250929416_AddTransferCountToAccount.cs</DependentUpon>
+    <Compile Include="Migrations\201610260909346_InitProject.cs" />
+    <Compile Include="Migrations\201610260909346_InitProject.Designer.cs">
+      <DependentUpon>201610260909346_InitProject.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
@@ -298,14 +290,8 @@
     <None Include="Project_Readme.html" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201610240747020_InitialCreate.resx">
-      <DependentUpon>201610240747020_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201610240754556_InitProject.resx">
-      <DependentUpon>201610240754556_InitProject.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201610250929416_AddTransferCountToAccount.resx">
-      <DependentUpon>201610250929416_AddTransferCountToAccount.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201610260909346_InitProject.resx">
+      <DependentUpon>201610260909346_InitProject.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

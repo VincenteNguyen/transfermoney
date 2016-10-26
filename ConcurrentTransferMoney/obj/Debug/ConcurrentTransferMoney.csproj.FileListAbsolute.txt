@@ -121,6 +121,8 @@ C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\bin\Microsoft.
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\bin\Microsoft.Owin.Security.Twitter.xml
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\bin\System.Web.Http.Owin.xml
-C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\obj\Debug\ConcurrentTransferMoney.csprojResolveAssemblyReference.cache
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\obj\Debug\ConcurrentTransferMoney.dll
 C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\obj\Debug\ConcurrentTransferMoney.pdb
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\obj\Debug\ConcurrentTransferMoney.csprojResolveAssemblyReference.cache
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\obj\Debug\ConcurrentTransferMoney.Migrations.InitProject.resources
+C:\SpiralWorks\My Documents\TransferMoney\ConcurrentTransferMoney\obj\Debug\ConcurrentTransferMoney.csproj.GenerateResource.Cache

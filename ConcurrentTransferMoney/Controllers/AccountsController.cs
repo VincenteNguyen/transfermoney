@@ -16,9 +16,14 @@ namespace ConcurrentTransferMoney.Controllers
 {
     public class AccountsController : ApiController
     {
-        private readonly ApplicationDbContext _db = new ApplicationDbContext();
+        private readonly ApplicationDbContext _db;
         private readonly ProducerConsumerQueue _pcQ = new ProducerConsumerQueue(1);
         private readonly TransferService _transferService = new TransferService();
+
+        public AccountsController(ApplicationDbContext dbContext)
+        {
+            _db = dbContext;
+        }
         // GET: api/Accounts
         public IQueryable<Account> GetAccounts()
         {
@@ -110,15 +115,19 @@ namespace ConcurrentTransferMoney.Controllers
             return Ok(resultBuilder);
         }
 
-        private async Task<string> GetAccountInformation(int id1, int id2)
+        public async Task<string> GetAccountInformation(int id1, int id2)
         {
-            var account1 = await _db.Accounts.FindAsync(id1);
-            var account2 = await _db.Accounts.FindAsync(id2);
-            var resultBuilder = new StringBuilder();
-            resultBuilder.Append(BuildAccountInformation(account1));
-            resultBuilder.Append(new String('-', 60));
-            resultBuilder.Append(BuildAccountInformation(account2));
-            return resultBuilder.ToString();
+            using (var context = new ApplicationDbContext())
+            {
+                var account1 = await context.Accounts.FindAsync(id1);
+                var account2 = await context.Accounts.FindAsync(id2);
+                var resultBuilder = new StringBuilder();
+                resultBuilder.Append(BuildAccountInformation(account1));
+                resultBuilder.Append(new String('-', 20));
+                resultBuilder.AppendLine();
+                resultBuilder.Append(BuildAccountInformation(account2));
+                return resultBuilder.ToString();
+            }
         }
 
         private static string BuildAccountInformation(Account account)
