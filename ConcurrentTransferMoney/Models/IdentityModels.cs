@@ -31,6 +31,6 @@ namespace ConcurrentTransferMoney.Models
         {
             return new ApplicationDbContext();
         }
-        public DbSet<Account> Accounts { get; set; }
+        public virtual DbSet<Account> Accounts { get; set; }
     }
 }
