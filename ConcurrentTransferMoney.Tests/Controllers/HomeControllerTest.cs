@@ -1,7 +1,6 @@
 ﻿using System.Web.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ConcurrentTransferMoney;
 using ConcurrentTransferMoney.Controllers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ConcurrentTransferMoney.Tests.Controllers
 {
@@ -12,10 +11,10 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         public void Index()
         {
             // Arrange
-            HomeController controller = new HomeController();
+            var controller = new HomeController();
 
             // Act
-            ViewResult result = controller.Index() as ViewResult;
+            var result = controller.Index() as ViewResult;
 
             // Assert
             Assert.IsNotNull(result);

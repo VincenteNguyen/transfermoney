@@ -1,11 +1,13 @@
-﻿using ConcurrentTransferMoney.LockVersion;
+﻿using System.Collections.Generic;
+using System.Linq;
+using ConcurrentTransferMoney.LockVersion;
 using ConcurrentTransferMoney.Models;
 
 namespace ConcurrentTransferMoney.BankTransferService
 {
     public class TransferService
     {
-        private static readonly LockProvider<int> AccountLocks = new LockProvider<int>(); 
+        private static readonly LockProvider<int> AccountLocks = new LockProvider<int>();
 
         public void Transfer(int fromAccountId, int toAccountId, int amount)
         {
@@ -22,26 +24,12 @@ namespace ConcurrentTransferMoney.BankTransferService
 
         public void TransferUsingLock(int fromAccountId, int toAccountId, int amount)
         {
-            var fromAccountLocker = AccountLocks.GetLock(fromAccountId);
-            var toAccountLocker = AccountLocks.GetLock(toAccountId);
-            if (fromAccountId < toAccountId)
+            var participantIds = new List<int> {fromAccountId, toAccountId}.OrderBy(x => x).ToList();
+            lock (AccountLocks.GetLock(participantIds[0]))
             {
-                lock (fromAccountLocker)
+                lock (AccountLocks.GetLock(participantIds[1]))
                 {
-                    lock (toAccountLocker)
-                    {
-                        Transfer(fromAccountId, toAccountId, amount);
-                    }
-                }
-            }
-            else
-            {
-                lock (toAccountLocker)
-                {
-                    lock (fromAccountLocker)
-                    {
-                        Transfer(fromAccountId, toAccountId, amount);
-                    }
+                    Transfer(fromAccountId, toAccountId, amount);
                 }
             }
         }

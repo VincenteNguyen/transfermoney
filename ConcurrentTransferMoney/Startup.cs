@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ConcurrentTransferMoney;
 using Microsoft.Owin;
 using Owin;
 
-[assembly: OwinStartup(typeof(ConcurrentTransferMoney.Startup))]
+[assembly: OwinStartup(typeof (Startup))]
 
 namespace ConcurrentTransferMoney
 {

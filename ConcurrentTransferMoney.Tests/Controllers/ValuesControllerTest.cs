@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Web.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ConcurrentTransferMoney;
+﻿using System.Linq;
 using ConcurrentTransferMoney.Controllers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ConcurrentTransferMoney.Tests.Controllers
 {
@@ -17,10 +11,10 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         public void Get()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
-            IEnumerable<string> result = controller.Get();
+            var result = controller.Get();
 
             // Assert
             Assert.IsNotNull(result);
@@ -33,10 +27,10 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         public void GetById()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
-            string result = controller.Get(5);
+            var result = controller.Get(5);
 
             // Assert
             Assert.AreEqual("value", result);
@@ -46,7 +40,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         public void Post()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             controller.Post("value");
@@ -58,7 +52,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         public void Put()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             controller.Put(5, "value");
@@ -70,7 +64,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         public void Delete()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             controller.Delete(5);

@@ -1,10 +1,12 @@
-@using ConcurrentTransferMoney.Areas.HelpPage
-@model InvalidSample
+@model ConcurrentTransferMoney.Areas.HelpPage.InvalidSample
+
 
 @if (HttpContext.Current.IsDebuggingEnabled)
 {
     <div class="warning-message-container">
+
         <p>@Model.ErrorMessage</p>
+
     </div>
 }
 else

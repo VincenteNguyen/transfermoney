@@ -1,39 +1,18 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace ConcurrentTransferMoney.BankTransferService
 {
     public class ProducerConsumerQueue
     {
-        private class WorkItem
-        {
-            public readonly TaskCompletionSource<object> TaskSource;
-            public readonly Action Action;
-            public readonly CancellationToken? CancelToken;
-
-            public WorkItem(
-                TaskCompletionSource<object> taskSource,
-                Action action,
-                CancellationToken? cancelToken)
-            {
-                TaskSource = taskSource;
-                Action = action;
-                CancelToken = cancelToken;
-            }
-        }
-
         private readonly BlockingCollection<WorkItem> _taskQ = new BlockingCollection<WorkItem>();
+        public readonly Task ConsumeTask;
 
-        public ProducerConsumerQueue(int workerCount)
+        public ProducerConsumerQueue()
         {
-            // Create and start a separate Task for each consumer:
-            for (int i = 0; i < workerCount; i++)
-                Task.Factory.StartNew(Consume);
+            ConsumeTask = Task.Factory.StartNew(Consume);
         }
 
         public void Dispose()
@@ -55,7 +34,7 @@ namespace ConcurrentTransferMoney.BankTransferService
 
         private void Consume()
         {
-            foreach (WorkItem workItem in _taskQ.GetConsumingEnumerable())
+            foreach (var workItem in _taskQ.GetConsumingEnumerable())
                 if (workItem.CancelToken.HasValue &&
                     workItem.CancelToken.Value.IsCancellationRequested)
                 {
@@ -78,6 +57,23 @@ namespace ConcurrentTransferMoney.BankTransferService
                     {
                         workItem.TaskSource.SetException(ex);
                     }
+        }
+
+        private class WorkItem
+        {
+            public readonly Action Action;
+            public readonly CancellationToken? CancelToken;
+            public readonly TaskCompletionSource<object> TaskSource;
+
+            public WorkItem(
+                TaskCompletionSource<object> taskSource,
+                Action action,
+                CancellationToken? cancelToken)
+            {
+                TaskSource = taskSource;
+                Action = action;
+                CancelToken = cancelToken;
+            }
         }
     }
 }

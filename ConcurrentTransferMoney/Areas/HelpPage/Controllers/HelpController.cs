@@ -2,12 +2,11 @@ using System;
 using System.Web.Http;
 using System.Web.Mvc;
 using ConcurrentTransferMoney.Areas.HelpPage.ModelDescriptions;
-using ConcurrentTransferMoney.Areas.HelpPage.Models;
 
 namespace ConcurrentTransferMoney.Areas.HelpPage.Controllers
 {
     /// <summary>
-    /// The controller that will handle requests for the help page.
+    ///     The controller that will handle requests for the help page.
     /// </summary>
     public class HelpController : Controller
     {
@@ -35,7 +34,7 @@ namespace ConcurrentTransferMoney.Areas.HelpPage.Controllers
         {
             if (!String.IsNullOrEmpty(apiId))
             {
-                HelpPageApiModel apiModel = Configuration.GetHelpPageApiModel(apiId);
+                var apiModel = Configuration.GetHelpPageApiModel(apiId);
                 if (apiModel != null)
                 {
                     return View(apiModel);
@@ -49,7 +48,7 @@ namespace ConcurrentTransferMoney.Areas.HelpPage.Controllers
         {
             if (!String.IsNullOrEmpty(modelName))
             {
-                ModelDescriptionGenerator modelDescriptionGenerator = Configuration.GetModelDescriptionGenerator();
+                var modelDescriptionGenerator = Configuration.GetModelDescriptionGenerator();
                 ModelDescription modelDescription;
                 if (modelDescriptionGenerator.GeneratedModels.TryGetValue(modelName, out modelDescription))
                 {

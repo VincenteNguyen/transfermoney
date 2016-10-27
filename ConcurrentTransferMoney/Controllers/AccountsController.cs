@@ -16,14 +16,15 @@ namespace ConcurrentTransferMoney.Controllers
 {
     public class AccountsController : ApiController
     {
-        private readonly ApplicationDbContext _db;
-        private readonly ProducerConsumerQueue _pcQ = new ProducerConsumerQueue(1);
+        private readonly ApplicationDbContext _db = new ApplicationDbContext();
+        private readonly ProducerConsumerQueue _pcQ = new ProducerConsumerQueue();
         private readonly TransferService _transferService = new TransferService();
 
         public AccountsController(ApplicationDbContext dbContext)
         {
-            _db = dbContext;
+            _db = dbContext ?? _db;
         }
+
         // GET: api/Accounts
         public IQueryable<Account> GetAccounts()
         {
@@ -58,9 +59,17 @@ namespace ConcurrentTransferMoney.Controllers
             if (numOfTransfer == 0) numOfTransfer = 1000;
             Parallel.For(0, numOfTransfer, i =>
             {
-                _pcQ.EnqueueTask(() => _transferService.Transfer(transferModel.FromAccountId, transferModel.ToAccountId, transferModel.Amount));
-                _pcQ.EnqueueTask(() => _transferService.Transfer(transferModel.ToAccountId, transferModel.FromAccountId, transferModel.Amount));
+                _pcQ.EnqueueTask(
+                    () =>
+                        _transferService.Transfer(transferModel.FromAccountId, transferModel.ToAccountId,
+                            transferModel.Amount));
+                _pcQ.EnqueueTask(
+                    () =>
+                        _transferService.Transfer(transferModel.ToAccountId, transferModel.FromAccountId,
+                            transferModel.Amount));
             });
+            _pcQ.Dispose();
+            _pcQ.ConsumeTask.Wait();
             return Ok("Your transfer request will be process");
         }
 
@@ -97,14 +106,14 @@ namespace ConcurrentTransferMoney.Controllers
         [Route("accounts/TransferUsingLock")]
         public async Task<IHttpActionResult> TransferUsingLock([FromUri] BankTransferModel transferModel)
         {
-            _transferService.Transfer(transferModel.FromAccountId, transferModel.ToAccountId,
+            _transferService.TransferUsingLock(transferModel.FromAccountId, transferModel.ToAccountId,
                 transferModel.Amount);
             var result = await GetAccountInformation(transferModel.FromAccountId, transferModel.ToAccountId);
             return Ok(result);
         }
 
         /// <summary>
-        ///     Quick check result of two account 1 and 2
+        ///     Quick check result of two account 1 and 2. Used for Producer Consumer queue
         /// </summary>
         /// <returns>string: Account1.Balance Account2.Balance</returns>
         [HttpGet]
