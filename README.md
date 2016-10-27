@@ -6,5 +6,7 @@
 - Database: LocalDb using CodeFirst to generate and seed data
 - Database for testing: drop and generate each test.
 
-+ API for TransferUsingQueue: .../accounts/TransferUsingQueue
-+ API for TransferUsingLock: .../accounts/TransferUsingLock
++ API seed data: http://localhost:34921/accounts/seed?numOfAccount=2
++ API quick check: http://localhost:34921/accounts/QuickCheckResult?id1=1&id2=2
++ API for TransferUsingQueue: http://localhost:34921/accounts/TransferUsingQueue?FromAccountId=1&ToAccountId=2&Amount=100
++ API for TransferUsingLock: http://localhost:34921/accounts/TransferUsingLock?FromAccountId=1&ToAccountId=2&Amount=100
