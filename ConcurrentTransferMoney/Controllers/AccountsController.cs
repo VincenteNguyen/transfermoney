@@ -60,6 +60,7 @@ namespace ConcurrentTransferMoney.Controllers
         public async Task<IHttpActionResult> TransferUsingQueueDemo([FromUri] BankTransferModel transferModel,
             int numOfTransfer)
         {
+            var result = await GetAccounts(transferModel.FromAccountId, transferModel.ToAccountId);
             if (numOfTransfer == 0) numOfTransfer = 1000;
             Parallel.For(0, numOfTransfer, i =>
             {
@@ -74,7 +75,8 @@ namespace ConcurrentTransferMoney.Controllers
             });
             _pcQ.Dispose();
             _pcQ.ConsumeTask.Wait();
-            return Ok("Your transfer request will be process");
+            result.AddRange(await GetAccounts(transferModel.FromAccountId, transferModel.ToAccountId));
+            return Ok(result);
         }
 
         [HttpGet]
@@ -94,7 +96,8 @@ namespace ConcurrentTransferMoney.Controllers
             int numOfTransfer)
         {
             if (numOfTransfer == 0) numOfTransfer = 1000;
-            var previousBuilder = await GetAccountInformation(transferModel.FromAccountId, transferModel.ToAccountId);
+            var result = await GetAccounts(transferModel.FromAccountId, transferModel.ToAccountId);
+
             Parallel.For(0, numOfTransfer, i =>
             {
                 _transferService.TransferUsingLock(transferModel.FromAccountId, transferModel.ToAccountId,
@@ -102,8 +105,8 @@ namespace ConcurrentTransferMoney.Controllers
                 _transferService.TransferUsingLock(transferModel.ToAccountId, transferModel.FromAccountId,
                     transferModel.Amount);
             });
-            var afterBuilder = await GetAccountInformation(transferModel.FromAccountId, transferModel.ToAccountId);
-            return Ok(previousBuilder + afterBuilder);
+            result.AddRange(await GetAccounts(transferModel.FromAccountId, transferModel.ToAccountId));
+            return Ok(result);
         }
 
         [HttpGet]
@@ -112,7 +115,7 @@ namespace ConcurrentTransferMoney.Controllers
         {
             _transferService.TransferUsingLock(transferModel.FromAccountId, transferModel.ToAccountId,
                 transferModel.Amount);
-            var result = await GetAccountInformation(transferModel.FromAccountId, transferModel.ToAccountId);
+            var result = await GetAccounts(transferModel.FromAccountId, transferModel.ToAccountId);
             return Ok(result);
         }
 
@@ -124,8 +127,19 @@ namespace ConcurrentTransferMoney.Controllers
         [Route("accounts/QuickCheckResult")]
         public async Task<IHttpActionResult> QuickCheckResult(int id1, int id2)
         {
-            var resultBuilder = await GetAccountInformation(id1, id2);
-            return Ok(resultBuilder);
+            var result = await GetAccounts(id1, id2);
+            return Ok(result);
+        }
+
+        private static async Task<List<Account>> GetAccounts(int id1, int id2)
+        {
+            var result = new List<Account>();
+            using (var context = ApplicationDbContext.Create())
+            {
+                result.Add(await context.Accounts.FindAsync(id1));
+                result.Add(await context.Accounts.FindAsync(id2));
+            }
+            return result;
         }
 
         public async Task<string> GetAccountInformation(int id1, int id2)
