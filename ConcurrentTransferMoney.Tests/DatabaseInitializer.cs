@@ -10,7 +10,6 @@ namespace ConcurrentTransferMoney.Tests
     {
         protected override void Seed(ApplicationDbContext context)
         {
-            // Add entities to test database.
             context.Accounts.AddOrUpdate(
                 new Account {Balance = 10000},
                 new Account {Balance = 5000});

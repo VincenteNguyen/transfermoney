@@ -119,10 +119,6 @@ namespace ConcurrentTransferMoney.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        ///     Quick check result of two account 1 and 2. Used for Producer Consumer queue
-        /// </summary>
-        /// <returns>string: Account1.Balance Account2.Balance</returns>
         [HttpGet]
         [Route("accounts/QuickCheckResult")]
         public async Task<IHttpActionResult> QuickCheckResult(int id1, int id2)
