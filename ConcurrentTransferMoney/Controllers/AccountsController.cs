@@ -16,9 +16,13 @@ namespace ConcurrentTransferMoney.Controllers
 {
     public class AccountsController : ApiController
     {
-        private readonly ApplicationDbContext _db = new ApplicationDbContext();
+        private readonly ApplicationDbContext _db = ApplicationDbContext.Create();
         private readonly ProducerConsumerQueue _pcQ = new ProducerConsumerQueue();
         private readonly TransferService _transferService = new TransferService();
+
+        public AccountsController()
+        {
+        }
 
         public AccountsController(ApplicationDbContext dbContext)
         {
@@ -126,7 +130,7 @@ namespace ConcurrentTransferMoney.Controllers
 
         public async Task<string> GetAccountInformation(int id1, int id2)
         {
-            using (var context = new ApplicationDbContext())
+            using (var context = ApplicationDbContext.Create())
             {
                 var account1 = await context.Accounts.FindAsync(id1);
                 var account2 = await context.Accounts.FindAsync(id2);

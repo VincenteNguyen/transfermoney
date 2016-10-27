@@ -11,7 +11,7 @@ namespace ConcurrentTransferMoney.BankTransferService
 
         public void Transfer(int fromAccountId, int toAccountId, int amount)
         {
-            using (var db = new ApplicationDbContext())
+            using (var db = ApplicationDbContext.Create())
             {
                 var fromAccount = db.Accounts.Find(fromAccountId);
                 var toAccount = db.Accounts.Find(toAccountId);

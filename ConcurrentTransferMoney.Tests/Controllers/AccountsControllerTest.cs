@@ -25,7 +25,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
         [TestInitialize]
         public void TestInitialize()
         {
-            _context = new ApplicationDbContext();
+            _context = ApplicationDbContext.Create();
             _context.Database.Initialize(true);
             _controller = new AccountsController(_context);
             _beforeFromAccount = _context.Accounts.FirstOrDefault();
@@ -51,7 +51,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
             var result = await _controller.TransferUsingQueueDemo(_transferModel, _numOfTransfer);
             _stopwatch.Stop();
             // Assert
-            var context2 = new ApplicationDbContext();
+            var context2 = ApplicationDbContext.Create();
             var afterFromAccount = context2.Accounts.Find(_beforeFromAccount.Id);
             var afterToAccount = context2.Accounts.Find(_beforeToAccount.Id);
 
@@ -92,7 +92,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
             _stopwatch.Stop();
 
             // Assert
-            var context2 = new ApplicationDbContext();
+            var context2 = ApplicationDbContext.Create();
             var afterFromAccount = context2.Accounts.Find(_beforeFromAccount.Id);
             var afterToAccount = context2.Accounts.Find(_beforeToAccount.Id);
 
@@ -119,7 +119,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
             _stopwatch.Stop();
 
             // Assert
-            var context2 = new ApplicationDbContext();
+            var context2 = ApplicationDbContext.Create();
             var afterFromAccount = context2.Accounts.Find(_beforeFromAccount.Id);
             var afterToAccount = context2.Accounts.Find(_beforeToAccount.Id);
 
@@ -159,7 +159,7 @@ namespace ConcurrentTransferMoney.Tests.Controllers
             _stopwatch.Stop();
 
             // Assert
-            var context2 = new ApplicationDbContext();
+            var context2 = ApplicationDbContext.Create();
             var afterFromAccount = context2.Accounts.Find(_beforeFromAccount.Id);
             var afterToAccount = context2.Accounts.Find(_beforeToAccount.Id);
 
